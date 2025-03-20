@@ -163,8 +163,8 @@ class SPRDataModule(L.LightningDataModule):
         self.folder_raw = self.folder_root / "raw"
         self.folder_preprocessed = self.folder_root / "preprocessed"
         self.folder_annotated = self.folder_root / "annotated"
-        
-        with open(str(labeltxt_path), "r") as f:
+        self.labeltxt_path = Path(labeltxt_path)
+        with open(str(self.labeltxt_path), "r") as f:
             # first line is asuumed to have title
             self.labelmap_txt = f.readlines()[1:]
 
@@ -308,11 +308,11 @@ class SPRDataModule(L.LightningDataModule):
 
             copy_path_annotated = train_folder / "annotated" / path_annotated.name
             copy_path_preprocessed = train_folder / "preprocessed" / path_preprocessed.name
-            copy_path_labelmap_txt = train_folder / "annotated" / self.labelmap_txt.name
+            copy_path_labelmap_txt = train_folder / "annotated" / self.labeltxt_path.name
 
             copy_path_annotated.write_bytes(path_annotated.read_bytes())
             copy_path_preprocessed.write_bytes(path_preprocessed.read_bytes())
-            copy_path_labelmap_txt.write_bytes(self.labelmap_txt.read_bytes())
+            copy_path_labelmap_txt.write_bytes(self.labeltxt_path.read_bytes())
 
             count += 1
         print(f"train saved [{count}] files, {num_train = }")
@@ -325,11 +325,11 @@ class SPRDataModule(L.LightningDataModule):
 
             copy_path_annotated = val_folder / "annotated" / path_annotated.name
             copy_path_preprocessed = val_folder / "preprocessed" / path_preprocessed.name
-            copy_path_labelmap_txt = val_folder / "annotated" / self.labelmap_txt.name
+            copy_path_labelmap_txt = val_folder / "annotated" / self.labeltxt_path.name
 
             copy_path_annotated.write_bytes(path_annotated.read_bytes())
             copy_path_preprocessed.write_bytes(path_preprocessed.read_bytes())
-            copy_path_labelmap_txt.write_bytes(self.labelmap_txt.read_bytes())
+            copy_path_labelmap_txt.write_bytes(self.labeltxt_path.read_bytes())
 
             count += 1
         print(f"val saved [{count}] files, {num_val = }")
@@ -342,11 +342,11 @@ class SPRDataModule(L.LightningDataModule):
 
             copy_path_annotated = test_folder / "annotated" / path_annotated.name
             copy_path_preprocessed = test_folder / "preprocessed" / path_preprocessed.name
-            copy_path_labelmap_txt = test_folder / "annotated" / self.labelmap_txt.name
+            copy_path_labelmap_txt = test_folder / "annotated" / self.labeltxt_path.name
 
             copy_path_annotated.write_bytes(path_annotated.read_bytes())
             copy_path_preprocessed.write_bytes(path_preprocessed.read_bytes())
-            copy_path_labelmap_txt.write_bytes(self.labelmap_txt.read_bytes())
+            copy_path_labelmap_txt.write_bytes(self.labeltxt_path.read_bytes())
 
             count += 1
         print(f"test saved [{count}] files, {num_test = }")
