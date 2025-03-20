@@ -120,8 +120,6 @@ class SPRSegmentModel(L.LightningModule):
         except Exception as e:
             print(e)
             traceback.print_exc()
-        
-        print(f"=== model params: {self._count_parameters(model)}")
         return model
     
     def _count_parameters(self, model):

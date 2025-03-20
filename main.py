@@ -36,6 +36,7 @@ def train(args):
         batch_size=args.train_batch_size,
         shuffle=args.shuffle,
         train_num_workers=args.train_num_workers,
+        labeltxt_path=args.labelmap_txt_path,
         data_split=args.data_split,
         train_ratio=args.train_ratio,
         val_ratio=args.val_ratio,
@@ -150,9 +151,10 @@ def tune_func(args):
 
     dm = SPRDataModule(
         root=args["root"],
-        batch_size=args["batch_size"],
+        batch_size=args["train_batch_size"],
         shuffle=args["shuffle"],
-        dl_num_workers=args["dl_num_workers"],
+        dl_num_workers=args["train_num_workers"],
+        labeltxt_path=args["labelmap_txt_path"],
         data_split=args["data_split"],
         train_ratio=args["train_ratio"],
         val_ratio=args["val_ratio"],

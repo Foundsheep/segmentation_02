@@ -149,12 +149,13 @@ class SPRDataset(Dataset):
         
 
 class SPRDataModule(L.LightningDataModule):
-    def __init__(self, root, batch_size, shuffle, train_num_workers, data_split=True, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1):
+    def __init__(self, root, batch_size, shuffle, train_num_workers, labeltxt_path, data_split=True, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1):
         super().__init__()
         self.root = root
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.train_num_workers = train_num_workers
+        self.labeltxt_path = labeltxt_path
         self.data_split = data_split
         self.train_ratio = train_ratio
         self.val_ratio = val_ratio
@@ -351,10 +352,9 @@ class SPRDataModule(L.LightningDataModule):
         make dictionaries that map label to name and name to label
         so that they could be later used in inference to show the labels' correspondent name
         """
-        root_as_p = Path(self.root)
-        labeltxt_path = root_as_p / Path("annotated") / Path("labelmap.txt")
-        
-        with open(str(labeltxt_path), "r") as f:
+        root_as_p = Path(self.root)    
+            
+        with open(str(self.labeltxt_path), "r") as f:
             # first line is asuumed to have title
             label_txt = f.readlines()[1:]
             
@@ -449,24 +449,3 @@ class SPRDataModule(L.LightningDataModule):
             num_workers=self.train_num_workers,
             persistent_workers=True
         )
-
-
-if __name__ == "__main__":
-    path = "./datasets/spr_sample_02_40"
-    print(Path(path).absolute().exists())
-
-    spr_dm = SPRDataModule(
-        root=path,
-        batch_size=4,
-        shuffle=False,
-        data_split=False,
-        dl_num_workers=2,
-    )
-    spr_dm.prepare_data()
-    spr_dm.setup(stage=None)
-
-    for batch in spr_dm.train_dataloader():
-        break
-
-    print(batch[0].size())
-    print(batch[1].size())
