@@ -155,7 +155,6 @@ class SPRDataModule(L.LightningDataModule):
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.train_num_workers = train_num_workers
-        self.labeltxt_path = labeltxt_path
         self.data_split = data_split
         self.train_ratio = train_ratio
         self.val_ratio = val_ratio
@@ -165,6 +164,10 @@ class SPRDataModule(L.LightningDataModule):
         self.folder_preprocessed = self.folder_root / "preprocessed"
         self.folder_annotated = self.folder_root / "annotated"
         
+        with open(str(labeltxt_path), "r") as f:
+            # first line is asuumed to have title
+            self.labelmap_txt = f.readlines()[1:]
+
         if not self.folder_annotated.exists():
             self.gather_data()
     def prepare_data(self):
@@ -271,7 +274,6 @@ class SPRDataModule(L.LightningDataModule):
             return success
 
         files_annotated = sorted(list(self.folder_annotated.glob("*.png")) + list(self.folder_annotated.glob("*.jpg")))
-        labelmap_txt = list(self.folder_annotated.glob("labelmap.txt"))[0]
 
         # make commonly necessary folders
         if num_train > 0:
@@ -306,11 +308,11 @@ class SPRDataModule(L.LightningDataModule):
 
             copy_path_annotated = train_folder / "annotated" / path_annotated.name
             copy_path_preprocessed = train_folder / "preprocessed" / path_preprocessed.name
-            copy_path_labelmap_txt = train_folder / "annotated" / labelmap_txt.name
+            copy_path_labelmap_txt = train_folder / "annotated" / self.labelmap_txt.name
 
             copy_path_annotated.write_bytes(path_annotated.read_bytes())
             copy_path_preprocessed.write_bytes(path_preprocessed.read_bytes())
-            copy_path_labelmap_txt.write_bytes(labelmap_txt.read_bytes())
+            copy_path_labelmap_txt.write_bytes(self.labelmap_txt.read_bytes())
 
             count += 1
         print(f"train saved [{count}] files, {num_train = }")
@@ -323,11 +325,11 @@ class SPRDataModule(L.LightningDataModule):
 
             copy_path_annotated = val_folder / "annotated" / path_annotated.name
             copy_path_preprocessed = val_folder / "preprocessed" / path_preprocessed.name
-            copy_path_labelmap_txt = val_folder / "annotated" / labelmap_txt.name
+            copy_path_labelmap_txt = val_folder / "annotated" / self.labelmap_txt.name
 
             copy_path_annotated.write_bytes(path_annotated.read_bytes())
             copy_path_preprocessed.write_bytes(path_preprocessed.read_bytes())
-            copy_path_labelmap_txt.write_bytes(labelmap_txt.read_bytes())
+            copy_path_labelmap_txt.write_bytes(self.labelmap_txt.read_bytes())
 
             count += 1
         print(f"val saved [{count}] files, {num_val = }")
@@ -340,11 +342,11 @@ class SPRDataModule(L.LightningDataModule):
 
             copy_path_annotated = test_folder / "annotated" / path_annotated.name
             copy_path_preprocessed = test_folder / "preprocessed" / path_preprocessed.name
-            copy_path_labelmap_txt = test_folder / "annotated" / labelmap_txt.name
+            copy_path_labelmap_txt = test_folder / "annotated" / self.labelmap_txt.name
 
             copy_path_annotated.write_bytes(path_annotated.read_bytes())
             copy_path_preprocessed.write_bytes(path_preprocessed.read_bytes())
-            copy_path_labelmap_txt.write_bytes(labelmap_txt.read_bytes())
+            copy_path_labelmap_txt.write_bytes(self.labelmap_txt.read_bytes())
 
             count += 1
         print(f"test saved [{count}] files, {num_test = }")
@@ -355,15 +357,10 @@ class SPRDataModule(L.LightningDataModule):
         make dictionaries that map label to name and name to label
         so that they could be later used in inference to show the labels' correspondent name
         """
-        root_as_p = Path(self.root)    
-            
-        with open(str(self.labeltxt_path), "r") as f:
-            # first line is asuumed to have title
-            label_txt = f.readlines()[1:]
-            
+        root_as_p = Path(self.root)                
         label_to_name_map = {}
         name_to_label_map = {}
-        for txt_idx, txt in enumerate(label_txt):
+        for txt_idx, txt in enumerate(self.labelmap_txt):
             divider_1 = txt.find(":")
             label_name = txt[:divider_1]
 
