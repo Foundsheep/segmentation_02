@@ -1,0 +1,6 @@
+# label:color_rgb:parts:actions
+background:0,0,0::
+lower:255,96,55::
+middle:221,255,51::
+rivet:61,245,61::
+upper:61,61,245::

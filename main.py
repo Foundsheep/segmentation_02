@@ -3,9 +3,14 @@ import lightning as L
 
 import datetime
 import yaml
+import io
 from args_parse import get_args
 from ltn_model import SPRSegmentModel
 from ltn_data import SPRDataModule
+from utils import post_process, adjust_ratio_and_convert_to_numpy, get_transforms
+from PIL import Image
+from pathlib import Path
+
 
 import ray
 from ray import tune
@@ -82,11 +87,13 @@ def train(args):
             weight_decay=args.weight_decay
         )
         trainer.fit(model=model, datamodule=dm)
+    print("*************** TRAINING DONE ***************")
+    print("*********************************************")
 
     if not args.fast_dev_run:
         trainer.test(ckpt_path="best", datamodule=dm)
 
-        example_input = torch.randn(3, args.resized_height, args.resized_width)
+        example_input = torch.randn(4, 3, args.resized_height, args.resized_width)
         # script_model = model.to_torchscript(method="trace", example_inputs=example_input, strict=False)    
         # torch.jit.save(script_model, f"{default_root_dir}/script_model.pt")
         # print("Torch script model has been saved!")
@@ -96,11 +103,12 @@ def train(args):
             input_sample=example_input,
             export_params=True
         )
-    print("*************** TRAINING DONE ***************")
+    print("**************** ONNX SAVED *****************")
     print("*********************************************")
 
-
 def predict(args):
+    print("************* PREDICTION START **************")
+    print("*********************************************")
     model = SPRSegmentModel.load_from_checkpoint(
         checkpoint_path=args.checkpoint_path,
         model_name=args.model_name,
@@ -112,6 +120,29 @@ def predict(args):
         momentum=args.momentum,
         weight_decay=args.weight_decay
     )
+
+    transforms = get_transforms(is_train=False)
+
+    if args.folder_to_predict:
+        if args.data_to_predict:
+            raise "Either 'folder_to_predict' or 'data_to_predict' is allowed in prediction arguments"
+        iteration_list = (
+            list(Path(args.folder_to_predict).glob("*.png")) +
+            list(Path(args.folder_to_predict).glob("*.jpg"))
+        )
+
+    test_data = []
+    for elem in iteration_list:
+        tmp_img = Image.open(elem if args.folder_to_predict else io.BytesIO(elem))
+        tmp_img = adjust_ratio_and_convert_to_numpy(tmp_img)
+        tmp_img = transforms(image=tmp_img)["image"]
+        test_data.append(tmp_img)
+
+    outputs = model(test_data)
+    post_process(outputs, args.labelmap_txt_path)
+    print("************* PREDICTION DONE ***************")
+    print("*********************************************")
+    
 
 def tune_func(args):    
     # GPU performance increases!

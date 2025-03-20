@@ -28,7 +28,7 @@ class Config():
     MIN_EPOCHS = 1
     NUM_CLASSES = 5
 
-    LABELMAP_TXT_PATH = "../training_part/datasets/spr_sample_01/annotated/labelmap.txt"
+    LABELMAP_TXT_PATH = "./labelmap.txt"
 
     # code
     SUCCESS = 1

@@ -174,4 +174,5 @@ cython_debug/
 notebooks/
 .venv*/
 2025*/
+inference*/
 datasets/

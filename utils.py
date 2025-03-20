@@ -1,12 +1,18 @@
 from pathlib import Path
 import random
+
+import torch
 from args_default import Config
+from PIL import Image
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import albumentations as A
+import torch.nn.functional as F
 from albumentations.pytorch import ToTensorV2
 import traceback
+import torch.nn.functional as Fs
+import datetime
 
 def seperate_data(root, train_ratio, val_ratio, test_ratio, shuffle=True):
     failure = Config.FAILURE
@@ -185,7 +191,7 @@ def get_transforms(is_train):
             A.RGBShift(r_shift_limit=(-50, 50), g_shift_limit=(-50, 50), b_shift_limit=(-50, 50)),
             A.ColorJitter(brightness=(0.8, 1), contrast=(0.8, 1), saturation=(0.5, 1), hue=(-0.5, 0.5)),
             A.RandomCrop(height=Config.CROP_HEIGHT, width=Config.CROP_HEIGHT, p=0.5),
-            A.Resize(height=Config.RESIZED_HEIGHT, width=Config.RESIZED_WIDTH),
+            A.Resize(height=Config.RESIZED_HEIGHT, width=Config.RESIZED_WIDTH, interpolation=0),
             A.HorizontalFlip(),
             A.GridDistortion(),            
             A.Blur(),
@@ -195,7 +201,7 @@ def get_transforms(is_train):
         ])
     else:
         transforms = A.Compose([
-            A.Resize(height=Config.RESIZED_HEIGHT, width=Config.RESIZED_WIDTH),
+            A.Resize(height=Config.RESIZED_HEIGHT, width=Config.RESIZED_WIDTH, interpolation=0),
             A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
             # A.Lambda(image=_lambda_minmax_fn),
             ToTensorV2(transpose_mask=True),
@@ -232,3 +238,80 @@ def get_label_info(labeltxt_path):
             label_to_rgb[txt_idx] = rgb_values
 
     return label_to_rgb
+
+def adjust_ratio_and_convert_to_numpy(img:Image.Image) -> Image.Image:
+    target_ratio = Config.TARGET_IMAGE_RATIO
+    h = img.height
+    w = img.width
+    ratio = h / w
+    new_ratio = 0.00
+
+    if ratio == target_ratio:
+        return np.array(img)
+    
+    elif ratio < target_ratio:
+        # print(f"img_path: [{img_path}] image's height is shorter than the standard")
+        new_h = int(w * target_ratio)
+        half_new_h = (new_h - h) // 2
+        if 2 * half_new_h != new_h:
+            another_half = new_h - half_new_h - h
+        else:
+            another_half = half_new_h  
+        
+        img_np = np.array(img)
+        img_new = np.pad(img_np, ((half_new_h, another_half), (0, 0), (0, 0)), "reflect")
+        # print(f"new ratio: [{img_new.shape[0] / img_new.shape[1]}], new_height: [{img_new.shape[0]}]")
+        
+    else:
+        # print(f"img_path: [{img_path}] image's width is shorter than the standard")
+        new_w = int(h / target_ratio)
+        half_new_w = (new_w - w) // 2
+        if 2 * half_new_w != new_w:
+            another_half = new_w - half_new_w - w
+        else:
+            another_half = half_new_w
+        
+        img_np = np.array(img)
+        img_new = np.pad(img_np, ((0, 0), (half_new_w, another_half), (0, 0)), "reflect")
+        # print(f"new ratio: [{img_new.shape[0] / img_new.shape[1]}], new_width: [{img_new.shape[1]}]")
+
+    new_ratio = img_new.shape[0] / img_new.shape[1]
+    img_new = np.array(Image.fromarray(img_new).resize((Config.TARGET_WIDTH, Config.TARGET_HEIGHT)))
+    assert f"{target_ratio :.2f}" == f"{new_ratio :.2f}", f"{target_ratio =}, {new_ratio =}"
+    assert img_new.shape[0] == Config.TARGET_HEIGHT, f"{img_new.shape = }"
+    return img_new
+
+def post_process(output: torch.Tensor, labelmap_path: str) -> None:
+    
+    output = F.softmax(output, dim=1) # N, C, H, W
+    output = output.argmax(1) # N, H, W
+    output = output.cpu().numpy().astype(np.uint8) # N, H, W
+    
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    
+    for idx, out in enumerate(output):
+        save_image(colour_image(out, labelmap_path), timestamp, str(idx).zfill(4))
+
+def save_image(image: np.ndarray, timestamp: str, file_name: str, to_w: int = None, to_h: int = None) -> None:
+    image_pil = Image.fromarray(image)
+    if to_w is not None and to_h is not None:
+        image_pil = image_pil.resize((to_w, to_h))
+
+    save_folder = Path(f"./inference_result_{timestamp}")
+    if not save_folder.exists():
+        save_folder.mkdir()
+        print(f"[{str(save_folder)} is made...]")
+
+    save_path = save_folder / f"{f'{file_name}.png'}"
+    image_pil.save(save_path)
+    print(f"[{file_name}.png] saved...!")
+
+def colour_image(image: np.ndarray, labelmap_path) -> np.ndarray:
+    label_info = get_label_info(labelmap_path)
+    canvas = np.zeros((image.shape[0], image.shape[1], 3))
+    for class_idx, rgb in label_info.items():
+        x, y = np.where(image == class_idx)
+        canvas[x, y, :] = rgb
+        
+    return canvas.astype(np.uint8)
+    

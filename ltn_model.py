@@ -133,32 +133,27 @@ class SPRSegmentModel(L.LightningModule):
         self.model.to(self.device)
         return self.model(x)
 
-    def _preprocess(self, img):
+    def _preprocess(self, images):
+        def _to_torch_tensor(img):
+            if isinstance(img, Image.Image):
+                x = np.array(img)
+                x = torch.from_numpy(x).permute(2, 0, 1)
+            elif isinstance(img, np.ndarray):
+                x = torch.from_numpy(img).permute(2, 0, 1)
+            elif isinstance(img, torch.Tensor):
+                x = img
+            else:
+                raise TypeError(f"image should be one of the PIL.Image.Image or numpy.ndarray or torch.Tensor. Input type is {type(img)}")
+            return x
 
-        # to torch.Tensor
-        if isinstance(img, Image.Image):
-            x = np.array(img)
-            x = torch.from_numpy(x)
-        elif isinstance(img, np.ndarray):
-            x = torch.from_numpy(img)
-        elif isinstance(img, torch.Tensor):
-            x = img
+        xs = []
+        if np.array(images).size == 3:
+            xs.append(_to_torch_tensor(images))
         else:
-            raise TypeError(f"image should be one of the PIL.Image.Image or numpy.ndarray or torch.Tensor. Input type is {type(img)}")
+            for img in images:
+                xs.append(_to_torch_tensor(img))
 
-        # dtype conversion
-        if x.dtype != torch.float:
-            x = x.type(torch.float)
-
-        # dimension for batch
-        if x.dim() == 3:
-            # C, H, W
-            if x.size()[0] != 3:
-                x = x.permute(2, 0, 1)
-            x = x.unsqueeze(0)
-        elif x.dim() != 4:
-            raise ValueError(f"input should have either 2 or 3 dimensions, but has {x.dim()} dimensions")
-        return x
+        return torch.stack(xs, dim=0).to(dtype=torch.float, device=self.device)
     
     def shared_step(self, batch, stage):
         x, y = batch

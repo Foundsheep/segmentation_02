@@ -7,7 +7,7 @@ import numpy as np
 import lightning as L
 import random
 
-from utils import erase_coloured_text_and_lines, get_transforms
+from utils import erase_coloured_text_and_lines, get_transforms, adjust_ratio_and_convert_to_numpy
 from args_default import Config
 import json
 
@@ -45,9 +45,9 @@ class SPRDataset(Dataset):
 
         # read image
         img = Image.open(img_path)
-        img = self._adjust_ratio_and_convert_to_numpy(img)
+        img = adjust_ratio_and_convert_to_numpy(img)
         label_rgb = Image.open(label_path)
-        label_rgb = self._adjust_ratio_and_convert_to_numpy(label_rgb)
+        label_rgb = adjust_ratio_and_convert_to_numpy(label_rgb)
 
         # # ------------ when to make masks in N, C, H, W
         # label_mask = np.zeros((label_rgb.shape[0], label_rgb.shape[1], self.num_classes))
@@ -145,47 +145,7 @@ class SPRDataset(Dataset):
 
         return image_list, label_list, label_txt
     
-    def _adjust_ratio_and_convert_to_numpy(img_path:str, img:Image.Image) -> Image.Image:
-        target_ratio = Config.TARGET_IMAGE_RATIO
-        h = img.height
-        w = img.width
-        ratio = h / w
-        new_ratio = 0.00
 
-        if ratio == target_ratio:
-            return np.array(img)
-        
-        elif ratio < target_ratio:
-            # print(f"img_path: [{img_path}] image's height is shorter than the standard")
-            new_h = int(w * target_ratio)
-            half_new_h = (new_h - h) // 2
-            if 2 * half_new_h != new_h:
-                another_half = new_h - half_new_h - h
-            else:
-                another_half = half_new_h  
-            
-            img_np = np.array(img)
-            img_new = np.pad(img_np, ((half_new_h, another_half), (0, 0), (0, 0)), "reflect")
-            # print(f"new ratio: [{img_new.shape[0] / img_new.shape[1]}], new_height: [{img_new.shape[0]}]")
-            
-        else:
-            # print(f"img_path: [{img_path}] image's width is shorter than the standard")
-            new_w = int(h / target_ratio)
-            half_new_w = (new_w - w) // 2
-            if 2 * half_new_w != new_w:
-                another_half = new_w - half_new_w - w
-            else:
-                another_half = half_new_w
-            
-            img_np = np.array(img)
-            img_new = np.pad(img_np, ((0, 0), (half_new_w, another_half), (0, 0)), "reflect")
-            # print(f"new ratio: [{img_new.shape[0] / img_new.shape[1]}], new_width: [{img_new.shape[1]}]")
-
-        new_ratio = img_new.shape[0] / img_new.shape[1]
-        img_new = np.array(Image.fromarray(img_new).resize((Config.TARGET_WIDTH, Config.TARGET_HEIGHT)))
-        assert f"{target_ratio :.2f}" == f"{new_ratio :.2f}", f"{target_ratio =}, {new_ratio =}"
-        assert img_new.shape[0] == Config.TARGET_HEIGHT, f"{img_new.shape = }"
-        return img_new
         
 
 class SPRDataModule(L.LightningDataModule):

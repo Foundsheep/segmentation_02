@@ -37,16 +37,13 @@ def get_args():
     parser.add_argument("--test_ratio", type=float, default=0.1)
 
     # inference
-    parser.add_argument("--img_path", type=str, default="")
-    parser.add_argument("--image_path", type=str)
+    parser.add_argument("--folder_to_predict", type=str, default="")
+    parser.add_argument("--list_to_predict", type=str, default="")
     parser.add_argument("--labelmap_txt_path", type=str, default=Config.LABELMAP_TXT_PATH)
-
 
     parser.add_argument("--predict", action=argparse.BooleanOptionalAction)
     parser.add_argument("--train", action=argparse.BooleanOptionalAction)
     parser.add_argument("--resume_training", action=argparse.BooleanOptionalAction)
     parser.add_argument("--fast_dev_run", action=argparse.BooleanOptionalAction)
 
-
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
