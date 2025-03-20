@@ -164,6 +164,9 @@ class SPRDataModule(L.LightningDataModule):
         self.folder_raw = self.folder_root / "raw"
         self.folder_preprocessed = self.folder_root / "preprocessed"
         self.folder_annotated = self.folder_root / "annotated"
+        
+        if not self.folder_annotated.exists():
+            self.gather_data()
     def prepare_data(self):
         """
         this part prepares data that are processed only once on CPU
@@ -380,6 +383,23 @@ class SPRDataModule(L.LightningDataModule):
         else:
             print("either of json files exists, so didn't make them all")   
 
+    def gather_data(self):
+        files_raw = self.folder_root.glob("*/raw/*.jpg")
+        files_annotated = self.folder_root.glob("*/annotated/*.png")
+
+        count = 0
+        for p in files_raw:
+            destination = self.folder_raw / p.name
+            destination.write_bytes(p.read_bytes())
+            count += 1
+        print(f"[{count}] raw files are gathered")
+        
+        count = 0
+        for p in files_annotated:
+            destination = self.folder_annotated / p.name
+            destination.write_bytes(p.read_bytes())
+            count += 1
+        print(f"[{count}] annotated files are gathered")
 
     def setup(self, stage: str):
         if stage == "fit":
