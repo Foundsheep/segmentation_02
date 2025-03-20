@@ -10,7 +10,7 @@ import random
 from utils import erase_coloured_text_and_lines, get_transforms, adjust_ratio_and_convert_to_numpy
 from args_default import Config
 import json
-
+import shutil
 
 class SPRDataset(Dataset):
     """
@@ -390,14 +390,14 @@ class SPRDataModule(L.LightningDataModule):
         count = 0
         for p in files_raw:
             destination = self.folder_raw / p.name
-            destination.write_bytes(p.read_bytes())
+            shutil.copy(p, destination)
             count += 1
         print(f"[{count}] raw files are gathered")
         
         count = 0
         for p in files_annotated:
             destination = self.folder_annotated / p.name
-            destination.write_bytes(p.read_bytes())
+            shutil.copy(p, destination)
             count += 1
         print(f"[{count}] annotated files are gathered")
 
