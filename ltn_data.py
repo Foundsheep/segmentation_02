@@ -384,20 +384,26 @@ class SPRDataModule(L.LightningDataModule):
             print("either of json files exists, so didn't make them all")   
 
     def gather_data(self):
+        # create the folders first
+        if not self.folder_raw.exists():
+            self.folder_raw.mkdir()
+        if not self.folder_annotated.exists():
+            self.folder_annotated.mkdir()
+        
         files_raw = self.folder_root.glob("*/raw/*.jpg")
         files_annotated = self.folder_root.glob("*/annotated/*.png")
 
         count = 0
         for p in files_raw:
             destination = self.folder_raw / p.name
-            shutil.copy(p, destination)
+            destination.write_bytes(p.read_bytes())
             count += 1
         print(f"[{count}] raw files are gathered")
         
         count = 0
         for p in files_annotated:
             destination = self.folder_annotated / p.name
-            shutil.copy(p, destination)
+            destination.write_bytes(p.read_bytes())
             count += 1
         print(f"[{count}] annotated files are gathered")
 
