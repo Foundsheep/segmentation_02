@@ -24,6 +24,7 @@ class SPRDataset(Dataset):
     def __init__(
         self, 
         ds_root,
+        labeltxt_path,
         is_train=True, 
         transforms=None
         ):
@@ -31,6 +32,7 @@ class SPRDataset(Dataset):
         self.ds_root = Path(ds_root)
         self.folder_preprocessed = self.ds_root / "preprocessed"
         self.folder_annotated = self.ds_root / "annotated"
+        self.labeltxt_path = Path(labeltxt_path)
         self.is_train = is_train
         self.transforms = transforms
         self.image_list, self.label_list, self.label_txt = self._read_paths()
@@ -137,8 +139,7 @@ class SPRDataset(Dataset):
 
         assert len(image_list) == len(label_list), f"{len(image_list) = }, {len(label_list)}"
         # to convert label image to multi dimensional [0,1] valued image
-        label_map_path = self.folder_annotated / Path("labelmap.txt")
-        with open(str(label_map_path), "r") as f:
+        with open(str(self.labeltxt_path), "r") as f:
 
             # first line is asuumed to have title
             label_txt = f.readlines()[1:]
@@ -408,35 +409,41 @@ class SPRDataModule(L.LightningDataModule):
         if stage == "fit":
             self.ds_train = SPRDataset(
                 ds_root=self.root + "/train",
+                labeltxt_path=self.labeltxt_path,
                 is_train=True,
                 transforms=get_transforms(True)
             )
             self.ds_val = SPRDataset(
                 ds_root=self.root + "/val",
+                labeltxt_path=self.labeltxt_path,
                 is_train=False,
                 transforms=get_transforms(False)
             )
         elif stage == "validate":
             self.ds_val = SPRDataset(
                 ds_root=self.root + "/val",
+                labeltxt_path=self.labeltxt_path,
                 is_train=False,
                 transforms=get_transforms(False)
             )
         elif stage == "test":
             self.ds_test = SPRDataset(
                 ds_root=self.root + "/test",
+                labeltxt_path=self.labeltxt_path,
                 is_train=False,
                 transforms=get_transforms(False)
             )
         elif stage == "predict":
             self.ds_predict = SPRDataset(
                 ds_root=self.root + "/predict",
+                labeltxt_path=self.labeltxt_path,
                 is_train=False,
                 transforms=get_transforms(False)
             )
         else:
             self.ds_train = SPRDataset(
                 ds_root=self.root + "/train",
+                labeltxt_path=self.labeltxt_path,
                 is_train=True,
                 transforms=get_transforms(True)
             )
