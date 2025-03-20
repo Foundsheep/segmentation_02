@@ -15,8 +15,8 @@ class Config():
     TRAIN_NUM_GPUS = 2
     LOG_EVERY_N_STEPS = 1
     TRAIN_LOG_FOLDER = str(Path(__file__).absolute().parent)
-    CHECKPOINT_PATH = "../serving_part/20240704_165444/lightning_logs/version_0/checkpoints/epoch=4-step=10.ckpt"
-    MODEL_NAME = "UnetPlusPlus"
+    CHECKPOINT_PATH = ""
+    MODEL_NAME = "SegFormer"
     LOSS_NAME = "DiceLoss"
     OPTIMIZER_NAME = "Adam"
     LR = 0.001
