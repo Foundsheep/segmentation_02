@@ -174,7 +174,7 @@ class SPRSegmentModel(L.LightningModule):
 
         self.log(f"{stage}_IoU", iou, prog_bar=True, on_epoch=True, sync_dist=True)
         self.log(f"{stage}_accuracy", accuracy, prog_bar=True, on_epoch=True, sync_dist=True)
-        self.log(f"{stage}_f1_score", f1_score)
+        self.log(f"{stage}_f1_score", f1_score, prog_bar=True, on_epoch=True, sync_dist=True)
         self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True, sync_dist=True) 
         
         
