@@ -281,7 +281,7 @@ def adjust_ratio_and_convert_to_numpy(img:Image.Image) -> Image.Image:
     assert img_new.shape[0] == Config.TARGET_HEIGHT, f"{img_new.shape = }"
     return img_new
 
-def post_process(output: torch.Tensor, labelmap_path: str) -> None:
+def post_process(output: torch.Tensor, names: list[str], labelmap_path: str) -> None:
     
     output = F.softmax(output, dim=1) # N, C, H, W
     output = output.argmax(1) # N, H, W
@@ -289,8 +289,9 @@ def post_process(output: torch.Tensor, labelmap_path: str) -> None:
     
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     
-    for idx, out in enumerate(output):
-        save_image(colour_image(out, labelmap_path), timestamp, str(idx).zfill(4))
+    for idx, (out, name) in enumerate(zip(output, names)):
+        # save_image(colour_image(out, labelmap_path), timestamp, str(idx).zfill(4))
+        save_image(colour_image(out, labelmap_path), timestamp, name)
 
 def save_image(image: np.ndarray, timestamp: str, file_name: str, to_w: int = None, to_h: int = None) -> None:
     image_pil = Image.fromarray(image)

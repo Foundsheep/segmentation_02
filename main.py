@@ -133,16 +133,18 @@ def predict(args):
             list(Path(args.folder_to_predict).glob("*.jpg")) + 
             list(Path(args.folder_to_predict).glob("*.JPG"))
         )
-
+    
+    names = []
     test_data = []
     for elem in iteration_list:
         tmp_img = Image.open(elem if args.folder_to_predict else io.BytesIO(elem))
         tmp_img = adjust_ratio_and_convert_to_numpy(tmp_img)
         tmp_img = transforms(image=tmp_img)["image"]
         test_data.append(tmp_img)
+        names.append(elem.name)
 
     outputs = model(test_data)
-    post_process(outputs, args.labelmap_txt_path)
+    post_process(outputs, names, args.labelmap_txt_path)
     print("************* PREDICTION DONE ***************")
     print("*********************************************")
     
