@@ -56,7 +56,8 @@ def train(args):
         log_every_n_steps=args.log_every_n_steps,
         default_root_dir=default_root_dir,
         fast_dev_run=args.fast_dev_run,
-        # strategy="ddp_find_unused_parameters_true",
+        strategy="ddp_find_unused_parameters_true",
+        strategy="ddp",
         check_val_every_n_epoch=1 # TODO: change        
     )
 
@@ -92,7 +93,7 @@ def train(args):
     print("*********************************************")
 
     if not args.fast_dev_run:
-        trainer.test(ckpt_path="best", datamodule=dm)
+        trainer.test(datamodule=dm)
 
         example_input = torch.randn(4, 3, args.resized_height, args.resized_width)
         # script_model = model.to_torchscript(method="trace", example_inputs=example_input, strict=False)    
