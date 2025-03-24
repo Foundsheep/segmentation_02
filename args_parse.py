@@ -38,7 +38,7 @@ def get_args():
 
     # inference
     parser.add_argument("--folder_to_predict", type=str, default="")
-    parser.add_argument("--list_to_predict", type=str, default="")
+    parser.add_argument("--data_to_predict", type=str, default="")
     parser.add_argument("--labelmap_txt_path", type=str, default=Config.LABELMAP_TXT_PATH)
 
     parser.add_argument("--predict", action=argparse.BooleanOptionalAction)

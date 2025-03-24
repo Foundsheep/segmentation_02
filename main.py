@@ -130,7 +130,8 @@ def predict(args):
             raise "Either 'folder_to_predict' or 'data_to_predict' is allowed in prediction arguments"
         iteration_list = (
             list(Path(args.folder_to_predict).glob("*.png")) +
-            list(Path(args.folder_to_predict).glob("*.jpg"))
+            list(Path(args.folder_to_predict).glob("*.jpg")) + 
+            list(Path(args.folder_to_predict).glob("*.JPG"))
         )
 
     test_data = []
