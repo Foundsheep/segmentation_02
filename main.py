@@ -93,7 +93,7 @@ def train(args):
     print("*********************************************")
 
     if not args.fast_dev_run:
-        trainer.test(datamodule=dm)
+        trainer.test(model=model, datamodule=dm)
 
         example_input = torch.randn(4, 3, args.resized_height, args.resized_width)
         # script_model = model.to_torchscript(method="trace", example_inputs=example_input, strict=False)    
