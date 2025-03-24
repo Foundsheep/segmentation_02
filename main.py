@@ -56,7 +56,7 @@ def train(args):
         log_every_n_steps=args.log_every_n_steps,
         default_root_dir=default_root_dir,
         fast_dev_run=args.fast_dev_run,
-        # strategy="ddp_find_unused_parameters_true",
+        strategy="ddp_find_unused_parameters_true",
         check_val_every_n_epoch=1 # TODO: change        
     )
 
