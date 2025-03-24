@@ -388,7 +388,7 @@ class SPRDataModule(L.LightningDataModule):
         if not self.folder_annotated.exists():
             self.folder_annotated.mkdir()
         
-        files_raw = self.folder_root.glob("*/raw/*.jpg")
+        files_raw = list(self.folder_root.glob("*/raw/*.jpg")) + list(self.folder_root.glob("*/raw/*.JPG"))
         files_annotated = self.folder_root.glob("*/annotated/*.png")
 
         count = 0
