@@ -210,7 +210,7 @@ class SPRSegmentModel(L.LightningModule):
         callbacks = []
         if self.use_early_stop:
             early_stop = EarlyStopping(
-                monitor="val_iou",
+                monitor="val_IoU",
                 patience=4,
                 mode="max",
                 verbose=True
