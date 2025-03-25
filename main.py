@@ -142,8 +142,10 @@ def predict(args):
         tmp_img = transforms(image=tmp_img)["image"]
         test_data.append(tmp_img)
         names.append(elem.name)
-
-    outputs = model(test_data)
+    
+    model.eval()
+    with torch.no_grad():
+        outputs = model(test_data)
     post_process(outputs, names, args.labelmap_txt_path)
     print("************* PREDICTION DONE ***************")
     print("*********************************************")
