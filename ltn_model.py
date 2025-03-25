@@ -217,6 +217,12 @@ class SPRSegmentModel(L.LightningModule):
             )
             callbacks.append(early_stop)
 
+        checkpoint_save_last = ModelCheckpoint(
+            save_last=True,
+            filename="{epoch}-{step}-{train_loss:.4f}_last"
+        )
+        callbacks.append(checkpoint_save_last)
+
         checkpoint = ModelCheckpoint(
             monitor="val_loss",
             mode="min",
