@@ -21,8 +21,8 @@ class Config():
     OPTIMIZER_NAME = "Adam"
     LR = 0.001
     SHUFFLE = True
-    RESIZED_HEIGHT = 480 * 2 # height and width should be divisible by 32
-    RESIZED_WIDTH = 640 * 2
+    RESIZED_HEIGHT = 480 # height and width should be divisible by 32
+    RESIZED_WIDTH = 640
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     MAX_EPOCHS = 1
     MIN_EPOCHS = 1
