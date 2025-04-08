@@ -221,10 +221,10 @@ def get_label_info(labeltxt_path):
     label_to_rgb = {}
     if label_txt is None:
         label_to_rgb[0] = [0, 0, 0] # background
-        label_to_rgb[1] = [255, 96, 55] # lower
-        label_to_rgb[2] = [221, 255, 51] # middle
-        label_to_rgb[3] = [61, 245, 61] # rivet
-        label_to_rgb[4] = [61, 61, 245] # upper
+        label_to_rgb[1] = [255, 0, 0] # lower
+        label_to_rgb[2] = [255, 255, 0] # middle
+        label_to_rgb[3] = [0, 255, 0] # rivet
+        label_to_rgb[4] = [0, 0, 255] # upper
         
     else:
         for txt_idx, txt in enumerate(label_txt):
