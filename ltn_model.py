@@ -172,10 +172,10 @@ class SPRSegmentModel(L.LightningModule):
         accuracy = smp.metrics.accuracy(tp, fp, fn, tn, reduction="micro-imagewise")
         f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction="micro-imagewise")
 
-        self.log(f"{stage}_IoU", iou, prog_bar=True, on_epoch=True, sync_dist=False)
-        self.log(f"{stage}_accuracy", accuracy, prog_bar=True, on_epoch=True, sync_dist=False)
-        self.log(f"{stage}_f1_score", f1_score, prog_bar=True, on_epoch=True, sync_dist=False)
-        self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True, sync_dist=False) 
+        self.log(f"{stage}_IoU", iou, prog_bar=True, on_epoch=True, sync_dist=True)
+        self.log(f"{stage}_accuracy", accuracy, prog_bar=True, on_epoch=True, sync_dist=True)
+        self.log(f"{stage}_f1_score", f1_score, prog_bar=True, on_epoch=True, sync_dist=True)
+        self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True, sync_dist=True) 
         
         
         return {"loss": loss, "iou": iou, "accuracy":accuracy, "f1_score": f1_score}
