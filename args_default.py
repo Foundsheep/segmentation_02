@@ -2,8 +2,8 @@ import torch
 from pathlib import Path
 
 class Config():
-    CROP_HEIGHT = 1248
-    CROP_WIDTH = 1664
+    CROP_HEIGHT = int(1920 * 0.7)
+    CROP_WIDTH = int(2560 * 0.7)
     TARGET_IMAGE_RATIO = 0.75
     TARGET_HEIGHT = 1920
     TARGET_WIDTH = 2560
