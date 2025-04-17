@@ -17,7 +17,7 @@ def get_args():
     parser.add_argument("--loss_name", type=str, default=Config.LOSS_NAME)
     parser.add_argument("--optimizer_name", type=str, default=Config.OPTIMIZER_NAME)
     parser.add_argument("--lr", type=float, default=Config.LR)
-    parser.add_argument("--use_early_stop", type=bool, default=True)
+    parser.add_argument("--use_early_stop", action=argparse.BooleanOptionalAction)
     parser.add_argument("--momentum", type=float, default=0.0)
     parser.add_argument("--weight_decay", type=float, default=0.0)
     parser.add_argument("--shuffle", type=bool, default=Config.SHUFFLE)
